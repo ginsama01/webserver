@@ -1,6 +1,22 @@
 from socket import *
 import sys
 from threading import Thread
+import logging
+import os
+
+
+def get_logger(name=None):
+    name = os.path.basename(name)
+    name = os.path.splitext(name)[0]
+    logger = logging.getLogger(name)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s %(name)-18s %(levelname)-8s %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False
+    return logger
+logger = get_logger(__file__)
 
 
 class ServeThread(Thread):
@@ -12,12 +28,11 @@ class ServeThread(Thread):
 
     def run(self):
         connectionSocket, addr = self.connectionSocket, self.addr
-        print("Serving {}".format(addr))
         try:
             message = connectionSocket.recv(1024)
+            logger.info('message received : \n{}\nFROM\n{}'.format(message.decode('utf-8'),addr))
+
             filename = message.split()[1]
-            print(message)
-            print(filename[1:])
             f = open(__file__ + "\..\\" + filename[1:].decode('utf-8'), encoding='utf-8')
             outputdata = f.read(1024)
             # Send one HTTP header line into socket
@@ -44,8 +59,8 @@ class ServerManager(Thread):
         self.serve_threads={}
 
     def run(self):
+        logger.info('Ready to serve...')
         while True:
-            print('Ready to serve...')
             connectionSocket, addr = self.serverSocket.accept()
             if addr not in self.serve_threads:
                 self.serve_threads[addr] = ServeThread(self.serverSocket, connectionSocket, addr)
