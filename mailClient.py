@@ -1,90 +1,102 @@
-from socket import *
-import sys
+import socket
+import ssl
 import base64
 
 msg = "\r\n I love computer networks!"
 endmsg = "\r\n.\r\n"
-
-# Choose a mail server (e.g. Google mail server) and call it mailserver
-mailserver = ("smtp.gmail.com", 587)
-
+# Choose a mail server (e.g. Google mail server) and call it mailserver 
+mailserver =  ('smtp.gmail.com', 587)
 # Create socket called clientSocket and establish a TCP connection with mailserver
-#Fill in start
-clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.connect(mailserver)
-#Fill in end
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+clientSocket.connect(mailserver)
+recv = clientSocket.recv(1024)
+print (recv)
+if recv[:3] != '220':
+    print ('220 reply not received from server.')
+
+# Send HELO command and print server response.
+command ='HELO Alice\r\n'
+heloCommand = command.encode()
+clientSocket.send(heloCommand)
+recv1 = clientSocket.recv(1024)
+print (recv1)
+if recv1[:3] != '250':
+    print ('250 reply not received from server.')
+
+#Request an encrypted connection
+
+command = 'STARTTLS\r\n'.encode()
+clientSocket.send(command)
 recv = clientSocket.recv(1024).decode()
 print(recv)
+
 if recv[:3] != '220':
-    print('220 reply not received from server.')
-# Send HELO command and print server response.
-heloCommand = 'HELO Alice\r\n'
-clientSocket.send(heloCommand.encode())
+    print ('220 reply not received from server')
+
+#Encrypt the socket
+clientSocket = ssl.wrap_socket(clientSocket)
+
+
+
+# email and password for authentication
+email = (base64.b64encode('computer.net.3000@gmail.com'.encode())+ ('\r\n').encode())
+password= (base64.b64encode('quanghuy1234'.encode())+ ('\r\n').encode())
+
+#Authentication 
+clientSocket.send('AUTH LOGIN \r\n'.encode())
 recv1 = clientSocket.recv(1024).decode()
 print(recv1)
-if recv1[:3] != '250':
-    print('250 reply not received from server.')
- 
-#Info for username and password
-username = str(sys.argv[1])
-password = str(sys.argv[3])
-base64_str = ("\x00"+username+"\x00"+password).encode()
-base64_str = base64.b64encode(base64_str)
-authMsg = "AUTH PLAIN ".encode()+base64_str+"\r\n".encode()
-clientSocket.send(authMsg)
-recv_auth = clientSocket.recv(1024)
-print(recv_auth.decode())
-if recv1[:3] != '250':
-    print('250 reply not received from server.')
+if recv1[:3] != '334':
+    print ('334 reply not received from server')
+
+clientSocket.send(email)
+recv1 = clientSocket.recv(1024).decode()
+print(recv1)
+
+if recv1[:3] != '334':
+    print ('334 reply not received from server')
+
+clientSocket.send(password)
+recv1 = clientSocket.recv(1024).decode()
+print(recv1)
+if recv1[:3] != '235':
+    print ('235 reply not received from server')
+
 
 # Send MAIL FROM command and print server response.
-mailFrom = "MAIL FROM: <" + str(sys.argv[1]) + "> \r\n"
-clientSocket.send(mailFrom.encode())
-recv2 = clientSocket.recv(1024)
-print("After MAIL FROM command: " + recv2.decode())
+clientSocket.send("MAIL FROM: <computer.net.3000@gmail.com>\r\n".encode())
+recv2 = clientSocket.recv(1024).decode()
 if recv2[:3] != '250':
-    print('250 reply not received from server.')
+    print ('250 reply not received from server.')
 
 # Send RCPT TO command and print server response.
-# Fill in start
-rcptTo = "RCPT TO: <" + str(sys.argv[2]) + "> \r\n"
-clientSocket.send(rcptTo.encode())
-recv3 = clientSocket.recv(1024)
-print("After RCPT TO command: " + recv3.decode())
-if recv3[:3] != '250':
-    print('250 reply not received from server.')
-# Fill in end
+clientSocket.send("RCPT TO: <ginsama2002@gmail.com>\r\n".encode())
+recv2 = clientSocket.recv(1024).decode()
+print (recv2)
+
+
 
 # Send DATA command and print server response.
-# Fill in start
-data = "DATA\r\n"
-clientSocket.send(data.encode())
-recv4 = clientSocket.recv(1024)
-print("After DATA command: "+ recv4.decode())
-if recv4[:3] != '250':
-    print('250 reply not received from server.')
-# Fill in end
+clientSocket.send("DATA\r\n".encode())
+recv2 = clientSocket.recv(1024).decode()
+print (recv2)
 
-# Send message data.
-# Fill in start
+#Send data
+clientSocket.send(("Subject: SMTP Email Test! \r\n").encode())
 clientSocket.send(msg.encode())
-clientSocket.   send(endmsg.encode())
-recv_msg = clientSocket.recv(1024)
-print("Response after sending message body:"+ recv_msg.decode())
-if recv_msg[:3] != '250':
-    print('250 reply not received from server.')
-# Fill in end
 
 # Message ends with a single period.
-# Fill in start
-# Fill in end
+clientSocket.send(endmsg.encode())
+recv2 = clientSocket.recv(1024).decode()
+print(recv2)
 
 # Send QUIT command and get server response.
-# Fill in start
-quit = "QUIT\r\n"
-clientSocket.send(quit.encode())
-recv5 = clientSocket.recv(1024)
-print(recv5.decode())
+clientSocket.send("QUIT\r\n".encode())
+recv2 = clientSocket.recv(1024).decode()
+print(recv2)
+
+#Close connection with client socket
 clientSocket.close()
-# Fill in end
+
+print('Mail sent and connection closed')
