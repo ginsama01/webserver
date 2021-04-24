@@ -144,7 +144,7 @@ def create_message(subject, body, sender_email, receiver_email, password, filena
     # Add header as key/value pair to attachment part
     part.add_header(
         "Content-Disposition",
-        "attachment; filename= {filename}",
+        f"attachment; filename= {filename}",
     )
     #Them header cho tep dinh kem + dinh dang mac dinh hien thi cho file
     #Neu khong trinh duyet web se bat buoc tai xuong tep thay vi hien thi truc tiep
