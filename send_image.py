@@ -121,7 +121,7 @@ def send_email(sender_email, password, receiver_email, msg, mailserver='smtp.gma
     return 0
 
 
-def create_message(subject, body, sender_email, receiver_email, filenames=["img.jpeg"], return_text=False):
+def create_message(subject, body, sender_email, receiver_email, filenames=["img.jpeg", 'index.html'], return_text=False):
     """
     create a email message including text and file content.
     :param subject: subject of email
@@ -157,7 +157,7 @@ def create_message(subject, body, sender_email, receiver_email, filenames=["img.
     return message.as_bytes()
 
 
-text = create_message(subject='wibu', body='this is your love', sender_email=sender_email,
-                      receiver_email=receiver_email, return_text=False, filenames=['img.jpeg'])
+text = create_message(subject='wibu', body='send 2 file', sender_email=sender_email,
+                      receiver_email=receiver_email, return_text=False, filenames=['img.jpeg', 'index.html'])
 
 send_email(sender_email, password, receiver_email, text)
