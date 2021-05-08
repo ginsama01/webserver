@@ -115,8 +115,8 @@ def doOnePing(destAddr, timeout):
     return delay  
 
 def ping(host, timeout=1):
-    #dest = gethostbyname(host)  #trả về địa chỉ IP của máy chủ
-    dest = "172.112.113.1"
+    dest = gethostbyname(host)  #trả về địa chỉ IP của máy chủ
+    #dest = "172.112.113.1"
     print ("Pinging " + dest + " using Python:")
     print ("")
     #Send ping requests to a server separated by approximately one second
