@@ -40,6 +40,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
         # Nếu quá timeout thì dừng
         #T ko hiểu cái select này lắm, ai explain cho phát?
         howLongInSelect = (time.time() - startedSelect) #thời gian đợi
+        print(whatReady)
         if whatReady[0] == []: # Timeout
             return "0: Destination Network Unreachable"  #maybe cái này là op 2 ?
 
@@ -55,10 +56,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
             bytesInDouble = struct.calcsize("d")  #tính số bytes của double để lấy ra
             timeSent = struct.unpack("d", recPacket[28:28 + bytesInDouble])[0] #data chính là thời gian gửi
             return timeReceived - timeSent
-        elif packetID == ID:
-            return "Ivalid Type"
-        else:
-            return "Invalid ID"
+        
             
         #Sao t không bao giờ thấy bị loss nhỉ ? 
 
@@ -117,7 +115,8 @@ def doOnePing(destAddr, timeout):
     return delay  
 
 def ping(host, timeout=1):
-    dest = gethostbyname(host)  #trả về địa chỉ IP của máy chủ
+    #dest = gethostbyname(host)  #trả về địa chỉ IP của máy chủ
+    dest = "172.112.113.1"
     print ("Pinging " + dest + " using Python:")
     print ("")
     #Send ping requests to a server separated by approximately one second
@@ -135,6 +134,8 @@ def ping(host, timeout=1):
             RTTmax = max(RTTmax, delay)
             RTTmin = min(RTTmin, delay)
             RTTaverage = RTTaverage + delay
+        else:
+            print ("Error " + delay)
         time.sleep(1) # one second
         stt = stt + 1
     print("RTT max: " + str(RTTmax))
@@ -143,4 +144,4 @@ def ping(host, timeout=1):
     print("Packet loss rate: " + str((total - totalMessageReceived)/total * 100) + "%")
     return delay
 
-ping("localhost")
+ping("toidicodedao.com")
